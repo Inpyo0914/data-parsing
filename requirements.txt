@@ -1,28 +1,25 @@
 # Web Framework
-Flask==2.3.0
-Jinja2==3.1.2
-Werkzeug==2.3.0
+Flask>=2.3.0,<3.0.0
+Jinja2>=3.1.2,<4.0.0
+Werkzeug>=2.3.0,<3.0.0
 
 # Async & HTTP
-aiohttp==3.9.0
-asyncio==3.4.3
+aiohttp>=3.9.0,<4.0.0
+# Note: asyncio is a built-in Python 3.8+ library, no need to install
 
 # HTML Parsing
-beautifulsoup4==4.12.0
-lxml==4.9.3
+beautifulsoup4>=4.12.0,<5.0.0
+lxml>=4.9.3,<5.0.0
 
 # Elasticsearch
-elasticsearch==7.17.9
+elasticsearch>=7.17.0,<8.0.0
 
 # Scheduling
-APScheduler==3.10.4
+APScheduler>=3.10.0,<4.0.0
 
 # Configuration
-python-dotenv==1.0.0
-PyYAML==6.0.1
+python-dotenv>=1.0.0,<2.0.0
+PyYAML>=6.0.0,<7.0.0
 
 # Utilities
-python-dateutil==2.8.2
-
-# Logging (built-in, but specifying for clarity)
-# logging is built-in to Python
+python-dateutil>=2.8.0,<3.0.0

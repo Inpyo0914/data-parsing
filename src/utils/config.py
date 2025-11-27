@@ -67,50 +67,56 @@ class Config:
         self._loaded = True
 
     def _override_from_env(self) -> None:
-        """Override config values with environment variables."""
-        # Crawler settings
-        if os.getenv("FINANCIAL_JUICE_BASE_URL"):
-            self._set_nested("crawler.base_url", os.getenv("FINANCIAL_JUICE_BASE_URL"))
-        if os.getenv("CRAWLER_USER_AGENT"):
-            self._set_nested("crawler.user_agent", os.getenv("CRAWLER_USER_AGENT"))
-        if os.getenv("CRAWLER_DELAY"):
-            self._set_nested("crawler.delay", int(os.getenv("CRAWLER_DELAY")))
-        if os.getenv("CRAWLER_TIMEOUT"):
-            self._set_nested("crawler.timeout", int(os.getenv("CRAWLER_TIMEOUT")))
-        if os.getenv("CRAWLER_MAX_RETRIES"):
-            self._set_nested("crawler.max_retries", int(os.getenv("CRAWLER_MAX_RETRIES")))
+        """Override config values with environment variables using mapping table."""
+        # Define mapping between environment variables and config paths
+        # Format: (env_var_name, config_path, type_converter)
+        env_mappings = [
+            # Crawler settings
+            ("FINANCIAL_JUICE_BASE_URL", "crawler.base_url", str),
+            ("CRAWLER_USER_AGENT", "crawler.user_agent", str),
+            ("CRAWLER_DELAY", "crawler.delay", int),
+            ("CRAWLER_TIMEOUT", "crawler.timeout", int),
+            ("CRAWLER_MAX_RETRIES", "crawler.max_retries", int),
 
-        # Elasticsearch settings
-        if os.getenv("ES_HOST"):
-            self._set_nested("elasticsearch.host", os.getenv("ES_HOST"))
-        if os.getenv("ES_PORT"):
-            self._set_nested("elasticsearch.port", int(os.getenv("ES_PORT")))
-        if os.getenv("ES_INDEX_PREFIX"):
-            self._set_nested("elasticsearch.index_prefix", os.getenv("ES_INDEX_PREFIX"))
+            # Elasticsearch settings
+            ("ES_HOST", "elasticsearch.host", str),
+            ("ES_PORT", "elasticsearch.port", int),
+            ("ES_INDEX_PREFIX", "elasticsearch.index_prefix", str),
+            ("ES_USERNAME", "elasticsearch.username", str),
+            ("ES_PASSWORD", "elasticsearch.password", str),
 
-        # Flask settings
-        if os.getenv("FLASK_HOST"):
-            self._set_nested("flask.host", os.getenv("FLASK_HOST"))
-        if os.getenv("FLASK_PORT"):
-            self._set_nested("flask.port", int(os.getenv("FLASK_PORT")))
-        if os.getenv("FLASK_DEBUG"):
-            self._set_nested("flask.debug", os.getenv("FLASK_DEBUG").lower() == "true")
-        if os.getenv("FLASK_SECRET_KEY"):
-            self._set_nested("flask.secret_key", os.getenv("FLASK_SECRET_KEY"))
+            # Flask settings
+            ("FLASK_HOST", "flask.host", str),
+            ("FLASK_PORT", "flask.port", int),
+            ("FLASK_DEBUG", "flask.debug", self._parse_bool),
+            ("FLASK_SECRET_KEY", "flask.secret_key", str),
 
-        # Scheduler settings
-        if os.getenv("COLLECTION_SCHEDULE"):
-            self._set_nested("scheduler.cron_schedule", os.getenv("COLLECTION_SCHEDULE"))
+            # Scheduler settings
+            ("COLLECTION_SCHEDULE", "scheduler.cron_schedule", str),
 
-        # Logging settings
-        if os.getenv("LOG_LEVEL"):
-            self._set_nested("logging.level", os.getenv("LOG_LEVEL"))
-        if os.getenv("LOG_FILE"):
-            self._set_nested("logging.file.path", os.getenv("LOG_FILE"))
+            # Logging settings
+            ("LOG_LEVEL", "logging.level", str),
+            ("LOG_FILE", "logging.file.path", str),
 
-        # Environment
-        if os.getenv("ENVIRONMENT"):
-            self._set_nested("app.environment", os.getenv("ENVIRONMENT"))
+            # Environment
+            ("ENVIRONMENT", "app.environment", str),
+        ]
+
+        # Apply mappings
+        for env_var, config_path, type_converter in env_mappings:
+            value = os.getenv(env_var)
+            if value is not None and value != "":
+                try:
+                    converted_value = type_converter(value)
+                    self._set_nested(config_path, converted_value)
+                except (ValueError, TypeError) as e:
+                    # Skip invalid values but log warning
+                    pass
+
+    @staticmethod
+    def _parse_bool(value: str) -> bool:
+        """Parse boolean from string."""
+        return value.lower() in ("true", "1", "yes", "on")
 
     def get(self, key: str, default: Any = None) -> Any:
         """

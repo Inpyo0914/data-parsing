@@ -56,11 +56,12 @@ setup(
     extras_require={
         "dev": dev_requirements,
     },
-    entry_points={
-        "console_scripts": [
-            "financial-parser=src.web.app:main",
-        ],
-    },
+    # entry_points will be added when CLI is implemented
+    # entry_points={
+    #     "console_scripts": [
+    #         "financial-parser=src.web.app:main",
+    #     ],
+    # },
     include_package_data=True,
     package_data={
         "src.web": ["templates/*", "static/*/*"],

@@ -33,6 +33,9 @@ elasticsearch:
   host: "localhost"
   port: 9200
   index_prefix: "financial_data"
+  # Leave empty if authentication is not required
+  username: ""
+  password: ""
 
   # Index settings
   settings:

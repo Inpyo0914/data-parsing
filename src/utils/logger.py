@@ -120,11 +120,15 @@ def configure_default_logger():
     """Configure the default application logger from environment variables."""
     log_level = os.getenv("LOG_LEVEL", "INFO")
     log_file = os.getenv("LOG_FILE", "logs/app.log")
+    max_bytes = int(os.getenv("LOG_MAX_BYTES", "10485760"))  # 10MB default
+    backup_count = int(os.getenv("LOG_BACKUP_COUNT", "5"))
 
     setup_logger(
         name="financial_parser",
         log_level=log_level,
         log_file=log_file,
+        max_bytes=max_bytes,
+        backup_count=backup_count,
         console_output=True,
     )
 
