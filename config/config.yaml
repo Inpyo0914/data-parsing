@@ -1,0 +1,95 @@
+# Financial Data Parsing Service Configuration
+
+# Application Settings
+app:
+  name: "Financial Data Parser"
+  version: "0.1.0"
+  environment: "development"  # development, production
+
+# FinancialJuice Crawler Settings
+crawler:
+  base_url: "https://www.financialjuice.com"
+  user_agent: "Mozilla/5.0 (compatible; DataParser/1.0)"
+  timeout: 30
+  max_retries: 3
+  delay: 2  # seconds between requests
+
+  # Categories to crawl
+  categories:
+    - equities
+    - bonds
+    - forex
+    - commodities
+
+  # URL patterns (to be customized based on actual site structure)
+  url_patterns:
+    equities: "/equities"
+    bonds: "/bonds"
+    forex: "/forex"
+    commodities: "/commodities"
+
+# Elasticsearch Settings
+elasticsearch:
+  host: "localhost"
+  port: 9200
+  index_prefix: "financial_data"
+
+  # Index settings
+  settings:
+    number_of_shards: 1
+    number_of_replicas: 0
+
+  # Bulk indexing
+  bulk:
+    chunk_size: 100
+    max_chunk_bytes: 10485760  # 10MB
+
+# Flask Web Application Settings
+flask:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  secret_key: "change-this-in-production"
+
+  # Pagination
+  pagination:
+    items_per_page: 20
+    max_per_page: 100
+
+# Scheduler Settings
+scheduler:
+  enabled: true
+  cron_schedule: "0 9,15,21 * * *"  # Run at 9AM, 3PM, 9PM daily
+  timezone: "UTC"
+
+# Logging Settings
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # File logging
+  file:
+    enabled: true
+    path: "logs/app.log"
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
+
+  # Console logging
+  console:
+    enabled: true
+    level: "INFO"
+
+# Rate Limiting
+rate_limit:
+  enabled: true
+  requests_per_second: 1
+  burst: 3
+
+# Data Validation
+validation:
+  required_fields:
+    - title
+    - url
+    - category
+  max_title_length: 500
+  max_content_length: 50000

@@ -1,0 +1,28 @@
+# Web Framework
+Flask==2.3.0
+Jinja2==3.1.2
+Werkzeug==2.3.0
+
+# Async & HTTP
+aiohttp==3.9.0
+asyncio==3.4.3
+
+# HTML Parsing
+beautifulsoup4==4.12.0
+lxml==4.9.3
+
+# Elasticsearch
+elasticsearch==7.17.9
+
+# Scheduling
+APScheduler==3.10.4
+
+# Configuration
+python-dotenv==1.0.0
+PyYAML==6.0.1
+
+# Utilities
+python-dateutil==2.8.2
+
+# Logging (built-in, but specifying for clarity)
+# logging is built-in to Python
