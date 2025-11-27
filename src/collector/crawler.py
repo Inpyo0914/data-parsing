@@ -7,7 +7,7 @@ rate limiting, retry logic, and error handling.
 
 import asyncio
 import aiohttp
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from urllib.parse import urljoin
 
 from .rate_limiter import RateLimiter
@@ -39,7 +39,7 @@ class FinancialJuiceCrawler:
 
     def __init__(
         self,
-        config: Optional[Dict] = None,
+        config: Optional[Any] = None,
         base_url: Optional[str] = None,
         user_agent: Optional[str] = None,
         timeout: Optional[int] = None,

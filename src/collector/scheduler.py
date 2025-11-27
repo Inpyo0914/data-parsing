@@ -6,7 +6,7 @@ This module uses APScheduler to run the crawler at configured intervals.
 
 import asyncio
 from datetime import datetime
-from typing import Optional, Callable
+from typing import Optional, Callable, Any, Dict, List
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -33,7 +33,7 @@ class CrawlScheduler:
 
     def __init__(
         self,
-        config: Optional[Dict] = None,
+        config: Optional[Any] = None,
         on_success: Optional[Callable] = None,
         on_error: Optional[Callable] = None,
     ):
@@ -53,11 +53,17 @@ class CrawlScheduler:
 
         logger.info("Initialized CrawlScheduler")
 
-    async def run_crawl_job(self) -> None:
+    async def run_crawl_job(self) -> Dict[str, List[Dict]]:
         """
         Execute a single crawl job.
 
         This is the job function that gets called by the scheduler.
+
+        Returns:
+            Dictionary mapping category names to article lists
+
+        Raises:
+            CrawlerException: If crawling fails
         """
         job_start = datetime.now()
         logger.info(f"Starting scheduled crawl job at {job_start.isoformat()}")
