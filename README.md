@@ -52,7 +52,9 @@ FinancialJuice에서 금융 시장 관련 뉴스와 이벤트를 자동으로 �
 ### Backend
 - **Python 3.8+**: 메인 프로그래밍 언어
 - **Flask**: 경량 웹 프레임워크
-- **aiohttp / asyncio**: 비동기 HTTP 요청 및 데이터 수집
+- **aiohttp / asyncio**: 비동기 HTTP 요청 및 웹 크롤링
+- **BeautifulSoup4**: HTML 파싱 및 데이터 추출
+- **lxml**: 고성능 XML/HTML 파서 (선택사항)
 
 ### Data Storage
 - **Elasticsearch 7.x**: 데이터 저장 및 검색 엔진
@@ -69,34 +71,34 @@ FinancialJuice에서 금융 시장 관련 뉴스와 이벤트를 자동으로 �
 ## 시스템 아키텍처
 
 ```
-┌─────────────────────┐
-│  FinancialJuice API │
-└──────────┬──────────┘
-           │
-           │ (비동기 수집)
-           ▼
-┌─────────────────────┐
-│   Data Collector    │
-│   (Python/Async)    │
-└──────────┬──────────┘
-           │
-           │ (저장)
-           ▼
-┌─────────────────────┐
-│  Elasticsearch 7.x  │
-└──────────┬──────────┘
-           │
-           │ (조회)
-           ▼
-┌─────────────────────┐
-│   Flask Web App     │
-└──────────┬──────────┘
-           │
-           │ (전시)
-           ▼
-┌─────────────────────┐
-│   사용자 브라우저    │
-└─────────────────────┘
+┌─────────────────────────┐
+│ FinancialJuice 웹사이트 │
+└───────────┬─────────────┘
+            │
+            │ (웹 크롤링)
+            ▼
+┌─────────────────────────┐
+│   Web Crawler           │
+│   (aiohttp + BS4)       │
+└───────────┬─────────────┘
+            │
+            │ (파싱 & 저장)
+            ▼
+┌─────────────────────────┐
+│  Elasticsearch 7.x      │
+└───────────┬─────────────┘
+            │
+            │ (조회)
+            ▼
+┌─────────────────────────┐
+│   Flask Web App         │
+└───────────┬─────────────┘
+            │
+            │ (전시)
+            ▼
+┌─────────────────────────┐
+│   사용자 브라우저        │
+└─────────────────────────┘
 ```
 
 ---
@@ -105,11 +107,13 @@ FinancialJuice에서 금융 시장 관련 뉴스와 이벤트를 자동으로 �
 
 ### 1. 데이터 수집 (Data Collection)
 
-- FinancialJuice API를 통한 뉴스/이벤트 수집
-- 비동기 방식으로 여러 카테고리 동시 수집
+- FinancialJuice 웹사이트 크롤링을 통한 뉴스/이벤트 수집
+- 비동기 방식으로 여러 카테고리 동시 크롤링
+- HTML 파싱 및 구조화된 데이터 추출
 - 중복 데이터 필터링
 - 오류 발생 시 재시도 로직
 - 정해진 시간에 자동 실행 (스케줄링)
+- Rate limiting을 통한 서버 부하 최소화
 
 ### 2. 데이터 저장 (Data Storage)
 
@@ -186,7 +190,7 @@ data-parsing/
 
 - Python 3.8 이상
 - Elasticsearch 7.x
-- FinancialJuice API 접근 권한
+- 안정적인 인터넷 연결
 
 ### 설치 (예정)
 
@@ -220,9 +224,11 @@ python src/web/app.py
 ### 환경 변수
 
 ```bash
-# FinancialJuice API
-FINANCIAL_JUICE_API_KEY=your_api_key_here
-FINANCIAL_JUICE_BASE_URL=https://api.financialjuice.com
+# FinancialJuice 크롤링 설정
+FINANCIAL_JUICE_BASE_URL=https://www.financialjuice.com
+CRAWLER_USER_AGENT=Mozilla/5.0 (compatible; DataParser/1.0)
+CRAWLER_DELAY=2  # 요청 간 대기 시간 (초)
+CRAWLER_TIMEOUT=30  # 요청 타임아웃 (초)
 
 # Elasticsearch
 ES_HOST=localhost
@@ -268,8 +274,10 @@ http://localhost:5000
 - [ ] 개발 환경 설정
 
 ### Phase 2: 데이터 수집
-- [ ] FinancialJuice API 연동
-- [ ] 비동기 수집 로직 구현
+- [ ] FinancialJuice 웹 크롤러 구현
+- [ ] HTML 파싱 및 데이터 추출 로직
+- [ ] 비동기 크롤링 로직 구현
+- [ ] Rate limiting 및 에러 핸들링
 - [ ] 스케줄러 구현
 
 ### Phase 3: 데이터 저장
@@ -306,9 +314,11 @@ http://localhost:5000
 - 포트 및 호스트 설정 확인
 
 ### 데이터 수집 실패
-- API 키 유효성 확인
 - 네트워크 연결 확인
-- API 사용량 제한 확인
+- FinancialJuice 웹사이트 구조 변경 여부 확인
+- User-Agent 설정 확인
+- Rate limiting 설정 조정 (요청 간격 늘리기)
+- 크롤링 대상 URL 유효성 확인
 
 ---
 
