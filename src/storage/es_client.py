@@ -288,21 +288,26 @@ class ElasticsearchClient:
                 actions.append(action)
 
             # Execute bulk operation
-            success, failed = bulk(
+            # With stats_only=False, returns (success_count, list_of_errors)
+            # With stats_only=True, would return (success_count, failed_count)
+            success_count, failed_items = bulk(
                 self.client,
                 actions,
                 raise_on_error=False,
-                stats_only=True,
+                stats_only=False,  # Get full info including failures
             )
 
+            # Count failures from failed_items list
+            failed_count = len(failed_items) if failed_items else 0
+
             logger.info(
-                f"Bulk indexed to {index}: {success} successful, "
-                f"{len(failed) if isinstance(failed, list) else failed} failed"
+                f"Bulk indexed to {index}: {success_count} successful, "
+                f"{failed_count} failed"
             )
 
             return {
-                "success": success,
-                "failed": len(failed) if isinstance(failed, list) else failed,
+                "success": success_count,
+                "failed": failed_count,
             }
 
         except Exception as e:

@@ -137,10 +137,14 @@ class NewsIndexer:
         if not self.es_client.is_connected():
             return False
 
+        # Check if index exists first
+        if not self.es_client.index_exists(index):
+            return False
+
         try:
             query = {
                 "term": {
-                    "url.keyword": url
+                    "url": url  # url is keyword type, no .keyword needed
                 }
             }
 
@@ -155,7 +159,7 @@ class NewsIndexer:
         self,
         news_list: List[Dict],
         category: str,
-        skip_duplicates: bool = True,
+        skip_duplicates: bool = False,
     ) -> Dict[str, int]:
         """
         Index a list of news articles.
@@ -163,7 +167,9 @@ class NewsIndexer:
         Args:
             news_list: List of news dictionaries
             category: Category name
-            skip_duplicates: Skip documents that already exist
+            skip_duplicates: If True, skip documents with existing URLs.
+                           If False (default), update existing documents.
+                           Note: Setting to True requires extra queries and is slower.
 
         Returns:
             Dictionary with statistics
@@ -222,14 +228,15 @@ class NewsIndexer:
     def index_news_batch(
         self,
         news_data: Dict[str, List[Dict]],
-        skip_duplicates: bool = True,
+        skip_duplicates: bool = False,
     ) -> Dict[str, Any]:
         """
         Index news from multiple categories.
 
         Args:
             news_data: Dictionary mapping categories to news lists
-            skip_duplicates: Skip documents that already exist
+            skip_duplicates: If True, skip documents with existing URLs.
+                           If False (default), update existing documents.
 
         Returns:
             Dictionary with overall statistics
