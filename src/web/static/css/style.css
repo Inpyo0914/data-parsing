@@ -1,0 +1,140 @@
+/* Custom styles for Financial News application */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --dark-color: #212529;
+    --light-color: #f8f9fa;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    font-weight: bold;
+}
+
+/* Cards */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-title a {
+    color: var(--dark-color);
+}
+
+.card-title a:hover {
+    color: var(--primary-color);
+}
+
+/* Article Content */
+.article-content {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.article-content p {
+    margin-bottom: 1.2rem;
+}
+
+/* Badges */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Pagination */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    color: var(--primary-color);
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Search Form */
+.search-form .form-control {
+    border-radius: 20px;
+}
+
+.search-form .btn {
+    border-radius: 20px;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .article-content {
+        font-size: 1rem;
+    }
+}
+
+/* Loading and Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--secondary-color);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+/* Category Stats Bar */
+.bg-light a {
+    transition: color 0.2s;
+}
+
+.bg-light a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Card spacing */
+.card-header {
+    font-weight: 600;
+}
+
+.card-footer {
+    background-color: var(--light-color);
+}
+
+/* Error pages */
+.display-1 {
+    font-size: 6rem;
+    font-weight: 300;
+}

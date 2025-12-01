@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Search Results</h1>
+
+        <!-- Advanced Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="{{ url_for('main.search') }}" method="get">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="query" class="form-label">Search Query</label>
+                            <input type="text" class="form-control" id="query" name="q" value="{{ query or '' }}" placeholder="Enter keywords...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                <option value="equities" {% if category == 'equities' %}selected{% endif %}>Equities</option>
+                                <option value="bonds" {% if category == 'bonds' %}selected{% endif %}>Bonds</option>
+                                <option value="forex" {% if category == 'forex' %}selected{% endif %}>Forex</option>
+                                <option value="commodities" {% if category == 'commodities' %}selected{% endif %}>Commodities</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        {% if query %}
+        <p class="text-muted">
+            Found {{ total }} results for <strong>"{{ query }}"</strong>
+            {% if category %} in <strong>{{ category }}</strong>{% endif %}
+        </p>
+        {% endif %}
+
+        {% if articles %}
+        <!-- Search Results -->
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-12 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">
+                                    <a href="{{ url_for('main.news_detail', news_id=article.url) }}" class="text-decoration-none">
+                                        {{ article.title }}
+                                    </a>
+                                </h5>
+                                {% if article.summary %}
+                                <p class="card-text text-muted">
+                                    {{ article.summary[:300] }}{% if article.summary|length > 300 %}...{% endif %}
+                                </p>
+                                {% endif %}
+                                <small class="text-muted">
+                                    {% if article.published_date %}
+                                    Published: {{ article.published_date[:10] }}
+                                    {% else %}
+                                    Crawled: {{ article.crawled_at[:10] }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <span class="badge bg-primary ms-3">{{ article.category }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.search', q=query, category=category, page=page-1, per_page=per_page) }}">Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ p }}</span>
+                    </li>
+                    {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.search', q=query, category=category, page=p, per_page=per_page) }}">{{ p }}</a>
+                    </li>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.search', q=query, category=category, page=page+1, per_page=per_page) }}">Next</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <p class="text-center text-muted">
+            Showing {{ articles|length }} of {{ total }} results (Page {{ page }} of {{ total_pages }})
+        </p>
+        {% endif %}
+
+        {% elif query %}
+        <div class="alert alert-info" role="alert">
+            No results found for "{{ query }}". Try different keywords.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

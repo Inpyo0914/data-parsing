@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <article class="card">
+            <div class="card-header bg-primary text-white">
+                <span class="badge bg-light text-dark">{{ article.category }}</span>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title mb-4">{{ article.title }}</h1>
+
+                <div class="text-muted mb-4">
+                    {% if article.author %}
+                    <span>By {{ article.author }}</span> •
+                    {% endif %}
+                    {% if article.published_date %}
+                    <span>{{ article.published_date[:10] }}</span>
+                    {% else %}
+                    <span>Crawled: {{ article.crawled_at[:10] }}</span>
+                    {% endif %}
+                </div>
+
+                {% if article.summary %}
+                <div class="lead mb-4">
+                    {{ article.summary }}
+                </div>
+                {% endif %}
+
+                {% if article.content %}
+                <div class="article-content">
+                    {{ article.content | safe }}
+                </div>
+                {% endif %}
+
+                {% if article.tags %}
+                <div class="mt-4">
+                    <strong>Tags:</strong>
+                    {% for tag in article.tags %}
+                    <span class="badge bg-secondary">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                {% if article.url %}
+                <a href="{{ article.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    View Original Source
+                </a>
+                {% endif %}
+                <a href="{{ url_for('main.category', category=article.category) }}" class="btn btn-sm btn-outline-secondary">
+                    More {{ article.category }} News
+                </a>
+            </div>
+        </article>
+
+        <!-- Back Button -->
+        <div class="mt-3">
+            <a href="javascript:history.back()" class="btn btn-link">
+                ← Back to list
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

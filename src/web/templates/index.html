@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Latest Financial News</h1>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        {% if articles %}
+        <!-- News Articles -->
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <span class="badge bg-light text-dark">{{ article.category }}</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('main.news_detail', news_id=article.url) }}" class="text-decoration-none">
+                                {{ article.title }}
+                            </a>
+                        </h5>
+                        {% if article.summary %}
+                        <p class="card-text text-muted">
+                            {{ article.summary[:200] }}{% if article.summary|length > 200 %}...{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-muted small">
+                        {% if article.published_date %}
+                        Published: {{ article.published_date[:10] }}
+                        {% else %}
+                        Crawled: {{ article.crawled_at[:10] }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=page-1, per_page=per_page) }}">Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ p }}</span>
+                    </li>
+                    {% elif p <= 3 or p >= total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.index', page=p, per_page=per_page) }}">{{ p }}</a>
+                    </li>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=page+1, per_page=per_page) }}">Next</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <p class="text-center text-muted">
+            Showing {{ articles|length }} of {{ total }} articles (Page {{ page }} of {{ total_pages }})
+        </p>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            No articles found. Try crawling some data first!
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

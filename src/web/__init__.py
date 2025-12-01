@@ -1,3 +1,5 @@
 """Flask web application modules."""
 
-__all__ = []
+from .app import create_app
+
+__all__ = ["create_app"]

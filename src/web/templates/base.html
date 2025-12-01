@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ title }}{% endblock %} - Financial News</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <strong>Financial News</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if not category %}active{% endif %}" href="{{ url_for('main.index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if category == 'equities' %}active{% endif %}" href="{{ url_for('main.category', category='equities') }}">Equities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if category == 'bonds' %}active{% endif %}" href="{{ url_for('main.category', category='bonds') }}">Bonds</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if category == 'forex' %}active{% endif %}" href="{{ url_for('main.category', category='forex') }}">Forex</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if category == 'commodities' %}active{% endif %}" href="{{ url_for('main.category', category='commodities') }}">Commodities</a>
+                    </li>
+                </ul>
+
+                <!-- Search Form -->
+                <form class="d-flex" action="{{ url_for('main.search') }}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search news..." value="{{ query or '' }}">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Category Stats Bar -->
+    {% if stats %}
+    <div class="bg-light py-2">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col">
+                    <small class="text-muted">Articles by category:</small>
+                </div>
+                {% for cat, count in stats.items() %}
+                <div class="col">
+                    <small>
+                        <a href="{{ url_for('main.category', category=cat) }}" class="text-decoration-none">
+                            <strong>{{ cat.capitalize() }}</strong>: {{ count }}
+                        </a>
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Financial News Parser</p>
+            <small class="text-muted">Data sourced from FinancialJuice</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
