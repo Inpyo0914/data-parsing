@@ -63,6 +63,10 @@ class NewsView:
         Returns:
             Dictionary with news list, pagination info, and metadata
         """
+        # Validate pagination parameters first (before any early returns)
+        page = max(1, page)  # Ensure page is at least 1
+        per_page = max(1, min(100, per_page))  # Ensure per_page is 1-100
+
         # Check ES connection
         if not self.es_client.is_connected():
             logger.warning("Elasticsearch not connected in list_news")
@@ -79,6 +83,7 @@ class NewsView:
             }
 
         try:
+
             # Calculate offset
             from_offset = (page - 1) * per_page
 
@@ -162,6 +167,10 @@ class NewsView:
         Returns:
             Dictionary with search results and pagination info
         """
+        # Validate pagination parameters first (before any early returns)
+        page = max(1, page)  # Ensure page is at least 1
+        per_page = max(1, min(100, per_page))  # Ensure per_page is 1-100
+
         # Check ES connection
         if not self.es_client.is_connected():
             logger.warning("Elasticsearch not connected in search_news")
@@ -179,6 +188,7 @@ class NewsView:
             }
 
         try:
+
             # Calculate offset
             from_offset = (page - 1) * per_page
 
@@ -379,3 +389,12 @@ class NewsView:
         """Close Elasticsearch connection."""
         if self.es_client:
             self.es_client.close()
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.close()
+        return False

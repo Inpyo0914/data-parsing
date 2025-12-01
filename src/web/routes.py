@@ -42,13 +42,12 @@ def index():
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
 
-        # Limit per_page to prevent abuse
-        per_page = min(per_page, 100)
+        # Validate and limit per_page
+        per_page = max(1, min(per_page, 100))
 
-        view = get_news_view()
-        data = view.list_news(page=page, per_page=per_page)
-        stats = view.get_categories_stats()
-        view.close()
+        with get_news_view() as view:
+            data = view.list_news(page=page, per_page=per_page)
+            stats = view.get_categories_stats()
 
         return render_template(
             "index.html",
@@ -85,13 +84,12 @@ def category(category: str):
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
 
-        # Limit per_page
-        per_page = min(per_page, 100)
+        # Validate and limit per_page
+        per_page = max(1, min(per_page, 100))
 
-        view = get_news_view()
-        data = view.list_news(page=page, per_page=per_page, category=category)
-        stats = view.get_categories_stats()
-        view.close()
+        with get_news_view() as view:
+            data = view.list_news(page=page, per_page=per_page, category=category)
+            stats = view.get_categories_stats()
 
         return render_template(
             "category.html",
@@ -121,20 +119,19 @@ def search():
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
 
-        # Limit per_page
-        per_page = min(per_page, 100)
+        # Validate and limit per_page
+        per_page = max(1, min(per_page, 100))
 
-        view = get_news_view()
-        data = view.search_news(
-            query_string=query,
-            page=page,
-            per_page=per_page,
-            category=category,
-            date_from=date_from,
-            date_to=date_to
-        )
-        stats = view.get_categories_stats()
-        view.close()
+        with get_news_view() as view:
+            data = view.search_news(
+                query_string=query,
+                page=page,
+                per_page=per_page,
+                category=category,
+                date_from=date_from,
+                date_to=date_to
+            )
+            stats = view.get_categories_stats()
 
         return render_template(
             "search.html",
@@ -160,10 +157,9 @@ def news_detail(news_id: str):
         news_id: News ID (typically the URL)
     """
     try:
-        view = get_news_view()
-        article = view.get_news_detail(news_id)
-        stats = view.get_categories_stats()
-        view.close()
+        with get_news_view() as view:
+            article = view.get_news_detail(news_id)
+            stats = view.get_categories_stats()
 
         if article is None:
             return render_template(
@@ -210,17 +206,16 @@ def api_list_news():
         category = request.args.get("category", None)
         sort_by = request.args.get("sort_by", "crawled_at")
 
-        # Limit per_page
-        per_page = min(per_page, 100)
+        # Validate and limit per_page
+        per_page = max(1, min(per_page, 100))
 
-        view = get_news_view()
-        data = view.list_news(
-            page=page,
-            per_page=per_page,
-            category=category,
-            sort_by=sort_by
-        )
-        view.close()
+        with get_news_view() as view:
+            data = view.list_news(
+                page=page,
+                per_page=per_page,
+                category=category,
+                sort_by=sort_by
+            )
 
         return jsonify({
             "success": True,
@@ -259,19 +254,18 @@ def api_search():
         date_from = request.args.get("date_from", None)
         date_to = request.args.get("date_to", None)
 
-        # Limit per_page
-        per_page = min(per_page, 100)
+        # Validate and limit per_page
+        per_page = max(1, min(per_page, 100))
 
-        view = get_news_view()
-        data = view.search_news(
-            query_string=query,
-            page=page,
-            per_page=per_page,
-            category=category,
-            date_from=date_from,
-            date_to=date_to
-        )
-        view.close()
+        with get_news_view() as view:
+            data = view.search_news(
+                query_string=query,
+                page=page,
+                per_page=per_page,
+                category=category,
+                date_from=date_from,
+                date_to=date_to
+            )
 
         return jsonify({
             "success": True,
@@ -298,9 +292,8 @@ def api_news_detail(news_id: str):
         JSON response with article details
     """
     try:
-        view = get_news_view()
-        article = view.get_news_detail(news_id)
-        view.close()
+        with get_news_view() as view:
+            article = view.get_news_detail(news_id)
 
         if article is None:
             return jsonify({
@@ -330,9 +323,8 @@ def api_stats():
         JSON response with article counts by category
     """
     try:
-        view = get_news_view()
-        stats = view.get_categories_stats()
-        view.close()
+        with get_news_view() as view:
+            stats = view.get_categories_stats()
 
         return jsonify({
             "success": True,
