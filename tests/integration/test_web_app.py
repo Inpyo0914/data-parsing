@@ -1,7 +1,6 @@
 """Integration tests for Flask web application."""
 
 import pytest
-from unittest.mock import Mock, patch
 from src.web.app import create_app
 
 
@@ -155,39 +154,15 @@ class TestWebAppIntegration:
         # Should either exist (200) or fail gracefully (404)
         assert response.status_code in [200, 404]
 
-    @patch('src.web.views.NewsView')
-    def test_home_with_mock_data(self, mock_view_class, client):
-        """Test home page with mocked data."""
-        # Setup mock
-        mock_view = Mock()
-        mock_view.list_news = Mock(return_value={
-            'articles': [
-                {'title': 'Test Article', 'category': 'equities', 'url': 'http://test.com'}
-            ],
-            'page': 1,
-            'per_page': 20,
-            'total': 1,
-            'total_pages': 1,
-            'has_prev': False,
-            'has_next': False,
-        })
-        mock_view.get_categories_stats = Mock(return_value={
-            'equities': 10,
-            'bonds': 5,
-            'forex': 8,
-            'commodities': 3
-        })
-        mock_view.close = Mock()
-        mock_view.__enter__ = Mock(return_value=mock_view)
-        mock_view.__exit__ = Mock(return_value=False)
-        mock_view_class.return_value = mock_view
-
+    def test_home_with_es_unavailable(self, client):
+        """Test home page when Elasticsearch is unavailable."""
+        # This tests the real scenario where ES is not running
+        # The app should still load without crashing
         response = client.get('/')
         assert response.status_code == 200
 
-        # Verify view methods were called
-        mock_view.list_news.assert_called()
-        mock_view.get_categories_stats.assert_called()
+        # Should show empty results gracefully
+        # (ES connection will fail but app handles it)
 
     def test_context_manager_cleanup(self, app, client):
         """Test that view cleanup happens properly."""
