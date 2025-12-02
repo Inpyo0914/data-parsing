@@ -1,0 +1,43 @@
+[Unit]
+Description=Financial Data Web Service
+Documentation=https://github.com/Inpyo0914/data-parsing
+After=network.target elasticsearch.service
+Requires=elasticsearch.service
+Wants=financial-data-scheduler.service
+
+[Service]
+Type=simple
+User=financial-data
+Group=financial-data
+WorkingDirectory=/opt/financial-data/app
+Environment="PATH=/opt/financial-data/app/venv/bin"
+Environment="PYTHONPATH=/opt/financial-data/app"
+ExecStart=/opt/financial-data/app/venv/bin/gunicorn \
+    --bind 0.0.0.0:5000 \
+    --workers 4 \
+    --threads 2 \
+    --worker-class sync \
+    --timeout 120 \
+    --graceful-timeout 30 \
+    --keep-alive 5 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --access-logfile /opt/financial-data/app/logs/access.log \
+    --error-logfile /opt/financial-data/app/logs/error.log \
+    --log-level info \
+    "src.web.app:create_app()"
+
+# 재시작 정책
+Restart=always
+RestartSec=10
+
+# 보안 설정
+NoNewPrivileges=true
+PrivateTmp=true
+
+# 리소스 제한
+LimitNOFILE=65536
+MemoryLimit=1G
+
+[Install]
+WantedBy=multi-user.target

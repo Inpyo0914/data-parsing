@@ -1,0 +1,29 @@
+[Unit]
+Description=Financial Data Crawler Scheduler
+Documentation=https://github.com/Inpyo0914/data-parsing
+After=network.target elasticsearch.service
+Requires=elasticsearch.service
+
+[Service]
+Type=simple
+User=financial-data
+Group=financial-data
+WorkingDirectory=/opt/financial-data/app
+Environment="PATH=/opt/financial-data/app/venv/bin"
+Environment="PYTHONPATH=/opt/financial-data/app"
+ExecStart=/opt/financial-data/app/venv/bin/python -m src.collector.scheduler
+
+# 재시작 정책
+Restart=always
+RestartSec=10
+
+# 보안 설정
+NoNewPrivileges=true
+PrivateTmp=true
+
+# 리소스 제한
+LimitNOFILE=4096
+MemoryLimit=512M
+
+[Install]
+WantedBy=multi-user.target

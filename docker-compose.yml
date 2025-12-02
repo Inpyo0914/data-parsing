@@ -1,0 +1,78 @@
+# Financial Data Parsing Service - Docker Compose (Development)
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.16
+    container_name: financial-data-es
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - financial-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: financial-data-web
+    env_file:
+      - .env
+    environment:
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/app/logs
+      - ./src:/app/src  # 개발 모드: 소스 코드 마운트
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - financial-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  scheduler:
+    build: .
+    container_name: financial-data-scheduler
+    command: python -m src.collector.scheduler
+    env_file:
+      - .env
+    environment:
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+    volumes:
+      - ./logs:/app/logs
+      - ./src:/app/src  # 개발 모드: 소스 코드 마운트
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - financial-net
+    restart: unless-stopped
+
+volumes:
+  es_data:
+    driver: local
+
+networks:
+  financial-net:
+    driver: bridge
