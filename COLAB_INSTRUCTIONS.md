@@ -1,12 +1,12 @@
 # Google Colab에서 Flask 뉴스 웹사이트 실행하기
 
-## 방법 1: 직접 코드 복사 (권장)
+## ⭐ 방법 1: Colab 내장 기능 사용 (가장 간단! 추천)
 
 Google Colab 노트북에서 다음 셀들을 순서대로 실행하세요:
 
 ### 셀 1: Flask 설치
 ```python
-!pip install flask pyngrok
+!pip install flask
 ```
 
 ### 셀 2: Flask 앱 코드 작성
@@ -239,15 +239,57 @@ def index():
     return render_template_string(HTML_TEMPLATE, news_items=news_items)
 ```
 
-### 셀 3: 서버 실행 (ngrok 사용 - 외부 접근 가능)
+### 셀 3: 서버 실행 및 접속 URL 생성
+```python
+import threading
+from google.colab.output import eval_js
+
+# Flask 서버를 백그라운드에서 실행
+def run_app():
+    app.run(port=5000, debug=False, use_reloader=False)
+
+thread = threading.Thread(target=run_app)
+thread.daemon = True
+thread.start()
+
+# Colab에서 제공하는 공개 URL 생성
+import time
+time.sleep(2)  # 서버 시작 대기
+public_url = eval_js("google.colab.kernel.proxyPort(5000)")
+print(f"✅ 웹사이트 접속 URL: {public_url}")
+print(f"위 링크를 클릭하면 웹사이트를 볼 수 있습니다!")
+```
+
+**장점:**
+- ✅ 별도 가입 불필요
+- ✅ 인증 토큰 설정 불필요
+- ✅ 즉시 사용 가능
+- ✅ Colab 세션 내에서 안정적으로 작동
+
+---
+
+## 방법 2: ngrok 사용 (외부 공유 가능)
+
+다른 사람과 URL을 공유하고 싶다면 ngrok을 사용하세요:
+
+### 셀 1: 설치
+```python
+!pip install flask pyngrok
+```
+
+### 셀 2: Flask 앱 코드 (위의 셀 2와 동일)
+
+### 셀 3: ngrok으로 서버 실행
 ```python
 from pyngrok import ngrok
 import threading
 
+# ngrok 인증 토큰 설정 (필수!)
+ngrok.set_auth_token("YOUR_AUTH_TOKEN")  # 여기에 토큰 입력
+
 # ngrok 터널 생성
 public_url = ngrok.connect(5000)
 print(f"✅ 웹사이트 접속 URL: {public_url}")
-print(f"브라우저에서 위 URL로 접속하세요!")
 
 # Flask 서버 백그라운드 실행
 def run_app():
@@ -257,25 +299,48 @@ thread = threading.Thread(target=run_app)
 thread.daemon = True
 thread.start()
 
-print("\n✅ 서버 실행 중... (Ctrl+C로 종료)")
+print("\n✅ 서버 실행 중!")
 ```
+
+**ngrok 토큰 발급 방법:**
+1. https://dashboard.ngrok.com/signup 에서 무료 가입
+2. https://dashboard.ngrok.com/get-started/your-authtoken 에서 토큰 복사
+3. 위 코드의 `YOUR_AUTH_TOKEN` 부분에 붙여넣기
+
+**장점:**
+- ✅ 다른 사람과 URL 공유 가능
+- ✅ 외부 네트워크에서도 접근 가능
+
+**단점:**
+- ❌ 가입 및 인증 토큰 설정 필요
+- ❌ 무료 버전은 세션 제한 있음
 
 ---
 
-## 방법 2: Colab 기본 실행 (외부 접근 불가)
-
-ngrok 없이 Colab 내에서만 실행하려면:
+## 방법 3: localtunnel 사용 (ngrok 대안)
 
 ```python
 !pip install flask
+!npm install -g localtunnel
 
-# 위의 Flask 앱 코드를 복사한 후
-
-from google.colab.output import eval_js
-print(eval_js("google.colab.kernel.proxyPort(5000)"))
+# Flask 앱 코드 실행 후...
 
 # 별도 셀에서
-app.run(port=5000, debug=True)
+import threading
+import subprocess
+
+def run_app():
+    app.run(port=5000, debug=False)
+
+thread = threading.Thread(target=run_app)
+thread.daemon = True
+thread.start()
+
+import time
+time.sleep(3)
+
+# localtunnel 실행
+!lt --port 5000
 ```
 
 ---
@@ -297,25 +362,41 @@ news_items.append({
 
 ## 주의사항
 
-1. **ngrok 사용**: 외부에서 접속하려면 ngrok을 사용해야 합니다
-2. **세션 유지**: Colab 세션이 종료되면 웹사이트도 중지됩니다
-3. **무료 제한**: ngrok 무료 버전은 세션 제한이 있을 수 있습니다
+1. **세션 유지**: Colab 세션이 종료되면 웹사이트도 중지됩니다
+2. **접근 범위**: 방법 1(Colab 내장)은 본인만 접속 가능, 방법 2(ngrok)는 외부 공유 가능
+3. **무료 제한**: ngrok 무료 버전은 월 사용량 제한이 있습니다
 
 ---
 
 ## 문제 해결
 
-### 포트 이미 사용 중 오류
+### ❌ ngrok 인증 오류 발생시
+```
+PyngrokNgrokError: authentication failed
+```
+
+**해결 방법:**
+1. **방법 1 사용 (추천)**: 위의 "방법 1: Colab 내장 기능" 사용 - 인증 불필요
+2. **ngrok 토큰 설정**:
+   ```python
+   from pyngrok import ngrok
+   ngrok.set_auth_token("YOUR_AUTH_TOKEN")
+   ```
+   토큰은 https://dashboard.ngrok.com/get-started/your-authtoken 에서 발급
+
+### ❌ 포트 이미 사용 중 오류
 ```python
 # 포트 번호를 변경하세요
-public_url = ngrok.connect(5001)  # 5001로 변경
+public_url = eval_js("google.colab.kernel.proxyPort(5001)")
 app.run(port=5001)
 ```
 
-### ngrok 인증 토큰 필요
-```python
-from pyngrok import ngrok
-ngrok.set_auth_token("YOUR_AUTH_TOKEN")  # ngrok.com에서 무료 가입 후 토큰 발급
-```
+### ❌ URL이 생성되지 않음
+- 셀을 순서대로 실행했는지 확인
+- 서버 시작 대기 시간(`time.sleep(2)`)을 늘려보기
+- Colab 런타임 재시작 후 다시 시도
 
-ngrok 토큰은 https://dashboard.ngrok.com/get-started/your-authtoken 에서 발급받을 수 있습니다.
+### ❌ 웹페이지가 로드되지 않음
+- 생성된 URL을 **새 탭**에서 열기
+- 브라우저 캐시 삭제 후 재시도
+- Colab 런타임이 실행 중인지 확인
